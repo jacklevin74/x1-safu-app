@@ -571,6 +571,124 @@ body {
   color: var(--primary);
 }
 
+/* Network Switcher */
+.network-switcher {
+  position: relative;
+  margin-bottom: 12px;
+}
+
+.network-selector-btn {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 12px;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  color: var(--text-primary);
+  font-size: 0.875rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.network-selector-btn:hover {
+  border-color: var(--primary);
+  background: var(--bg-hover);
+}
+
+.network-icon {
+  font-size: 1rem;
+}
+
+.network-name {
+  flex: 1;
+  font-weight: 500;
+}
+
+.dropdown-arrow {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  transition: transform 0.2s ease;
+}
+
+.network-menu {
+  position: absolute;
+  top: calc(100% + 4px);
+  left: 0;
+  right: 0;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  overflow: hidden;
+  z-index: 100;
+  box-shadow: var(--shadow);
+}
+
+.network-option {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px;
+  background: transparent;
+  border: none;
+  color: var(--text-secondary);
+  font-size: 0.875rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.network-option:hover {
+  background: var(--bg-hover);
+  color: var(--text-primary);
+}
+
+.network-option.active {
+  color: var(--primary);
+  background: var(--primary-dim);
+}
+
+.check-mark {
+  margin-left: auto;
+  color: var(--primary);
+  font-weight: bold;
+}
+
+/* Network Info */
+.network-info {
+  margin-bottom: 12px;
+}
+
+.rpc-info {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.7rem;
+  color: var(--text-muted);
+  padding: 6px 10px;
+  background: var(--bg-primary);
+  border-radius: 6px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.network-highlight {
+  color: var(--primary);
+  font-weight: 600;
+}
+
+/* Faucet Button */
+.btn-faucet {
+  background: linear-gradient(135deg, #3b82f6, #06b6d4);
+  color: white;
+  margin-bottom: 12px;
+}
+
+.btn-faucet:hover:not(:disabled) {
+  transform: translateY(-1px);
+  box-shadow: 0 8px 24px rgba(59, 130, 246, 0.3);
+}
+
 /* Responsive */
 @media (max-width: 768px) {
   .sidebar {

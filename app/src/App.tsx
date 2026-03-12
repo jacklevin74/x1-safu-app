@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useMemo, useCallback } from 'react'
 import { ConnectionProvider, WalletProvider, useWallet } from '@solana/wallet-adapter-react'
 import { PhantomWalletAdapter, SolflareWalletAdapter } from '@solana/wallet-adapter-wallets'
 import { WalletModalProvider, useWalletModal } from '@solana/wallet-adapter-react-ui'
@@ -10,17 +10,49 @@ import { Sell } from './components/Sell'
 import { Exit } from './components/Exit'
 import { Withdraw } from './components/Withdraw'
 
-// Environment Configuration
-const RPC_URL = import.meta.env.VITE_RPC_URL || 'https://rpc.testnet.x1.xyz'
-const PROGRAM_ID = import.meta.env.VITE_PROGRAM_ID || 'SaFU1111111111111111111111111111111111111111'
-const NETWORK = import.meta.env.VITE_NETWORK || 'testnet'
+// Network Configuration
+const NETWORKS = {
+  mainnet: {
+    name: 'Mainnet',
+    rpc: 'https://rpc.mainnet.x1.xyz',
+    programId: 'SaFU1111111111111111111111111111111111111111',
+    explorer: 'https://explorer.mainnet.x1.xyz',
+    icon: '🔴',
+    faucet: null
+  },
+  testnet: {
+    name: 'Testnet',
+    rpc: 'https://rpc.testnet.x1.xyz',
+    programId: 'SaFU1111111111111111111111111111111111111111',
+    explorer: 'https://explorer.testnet.x1.xyz',
+    icon: '🧪',
+    faucet: 'https://faucet.testnet.x1.xyz'
+  }
+} as const
 
-const wallets = [new PhantomWalletAdapter(), new SolflareWalletAdapter()]
+type NetworkType = keyof typeof NETWORKS
 
 function AppContent() {
   const wallet = useWallet()
   const { setVisible } = useWalletModal()
   const [activeTab, setActiveTab] = useState('dashboard')
+  const [network, setNetwork] = useState<NetworkType>('testnet')
+  const [showNetworkMenu, setShowNetworkMenu] = useState(false)
+
+  const currentNetwork = NETWORKS[network]
+
+  const handleNetworkSwitch = useCallback((newNetwork: NetworkType) => {
+    setNetwork(newNetwork)
+    setShowNetworkMenu(false)
+    // Force reload to apply new RPC endpoint
+    window.location.reload()
+  }, [])
+
+  const openFaucet = () => {
+    if (currentNetwork.faucet) {
+      window.open(currentNetwork.faucet, '_blank')
+    }
+  }
 
   const renderContent = () => {
     switch(activeTab) {
@@ -83,9 +115,47 @@ function AppContent() {
         </nav>
 
         <div className="wallet-section">
-          <div className="network-badge">
-            {NETWORK === 'mainnet' ? '🔴' : '🧪'} X1 {NETWORK.charAt(0).toUpperCase() + NETWORK.slice(1)}
+          {/* Network Switcher */}
+          <div className="network-switcher">
+            <button 
+              className="network-selector-btn"
+              onClick={() => setShowNetworkMenu(!showNetworkMenu)}
+            >
+              <span className="network-icon">{currentNetwork.icon}</span>
+              <span className="network-name">X1 {currentNetwork.name}</span>
+              <span className="dropdown-arrow">▼</span>
+            </button>
+            
+            {showNetworkMenu && (
+              <div className="network-menu">
+                {(Object.keys(NETWORKS) as NetworkType[]).map((netKey) => (
+                  <button
+                    key={netKey}
+                    className={`network-option ${network === netKey ? 'active' : ''}`}
+                    onClick={() => handleNetworkSwitch(netKey)}
+                  >
+                    <span>{NETWORKS[netKey].icon}</span>
+                    <span>X1 {NETWORKS[netKey].name}</span>
+                    {network === netKey && <span className="check-mark">✓</span>}
+                  </button>
+                ))}
+              </div>
+            )}
           </div>
+
+          {/* Faucet Button for Testnet */}
+          {currentNetwork.faucet && (
+            <button className="btn btn-faucet btn-sm btn-full" onClick={openFaucet}>
+              <span>🚰</span> Get Test XNT
+            </button>
+          )}
+
+          <div className="network-info">
+            <div className="rpc-info" title={currentNetwork.rpc}>
+              RPC: {currentNetwork.rpc.replace('https://', '').split('/')[0]}
+            </div>
+          </div>
+
           {wallet.connected ? (
             <div className="wallet-info">
               <div className="wallet-address">
@@ -107,7 +177,10 @@ function AppContent() {
         <div className="header">
           <h1>X1SAFE Protocol</h1>
           <p>1 X1SAFE = 1 USD equivalent at deposit time</p>
-          <div className="program-id">Program: {PROGRAM_ID.slice(0, 8)}...{PROGRAM_ID.slice(-8)}</div>
+          <div className="program-id">
+            Network: <span className="network-highlight">X1 {currentNetwork.name}</span> | 
+            Program: {currentNetwork.programId.slice(0, 8)}...{currentNetwork.programId.slice(-8)}
+          </div>
         </div>
         {renderContent()}
       </div>
@@ -115,9 +188,19 @@ function AppContent() {
   )
 }
 
-function App() {
+// Wrapper to handle network switching with new ConnectionProvider
+function NetworkedApp() {
+  const [network, _setNetwork] = useState<NetworkType>(() => {
+    // Check localStorage or default to testnet
+    const saved = localStorage.getItem('x1safe-network') as NetworkType
+    return saved && NETWORKS[saved] ? saved : 'testnet'
+  })
+
+  const currentNetwork = NETWORKS[network]
+  const wallets = useMemo(() => [new PhantomWalletAdapter(), new SolflareWalletAdapter()], [])
+
   return (
-    <ConnectionProvider endpoint={RPC_URL}>
+    <ConnectionProvider endpoint={currentNetwork.rpc}>
       <WalletProvider wallets={wallets} autoConnect>
         <WalletModalProvider>
           <AppContent />
@@ -127,4 +210,7 @@ function App() {
   )
 }
 
-export default App
+// Export App with proper structure
+export default function App() {
+  return <NetworkedApp />
+}
