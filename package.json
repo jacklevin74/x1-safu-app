@@ -1,0 +1,29 @@
+{
+  "name": "x1safu",
+  "version": "0.1.0",
+  "description": "X1SAFE Protocol - Secure Savings on X1 Blockchain",
+  "scripts": {
+    "dev": "cd app && npm run dev",
+    "build": "cd app && npm run build",
+    "preview": "cd app && npm run preview",
+    "deploy:setup": "./scripts/setup-vercel.sh",
+    "deploy:preview": "./scripts/deploy-vercel.sh preview",
+    "deploy:prod": "./scripts/deploy-vercel.sh prod",
+    "test": "anchor test",
+    "build:program": "anchor build",
+    "deploy:program:testnet": "anchor deploy --provider.cluster https://rpc.testnet.x1.xyz",
+    "deploy:program:mainnet": "anchor deploy --provider.cluster https://rpc.mainnet.x1.xyz"
+  },
+  "dependencies": {
+    "@coral-xyz/anchor": "^0.29.0"
+  },
+  "devDependencies": {
+    "@types/bn.js": "^5.1.0",
+    "@types/chai": "^4.3.0",
+    "@types/mocha": "^9.0.0",
+    "chai": "^4.3.4",
+    "mocha": "^9.0.3",
+    "ts-mocha": "^10.0.0",
+    "typescript": "^4.3.5"
+  }
+}
